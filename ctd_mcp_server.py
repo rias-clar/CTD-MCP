@@ -11,9 +11,9 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 mcp = FastMCP("Claroty CTD Bridge")
 
 # Hardcoded environment parameters as provided
-CTD_HOST = "site-tender-python-1.knwlkgvw.demotapp.com"
+CTD_HOST = "192.168.1.215"
 USERNAME = "admin"
-PASSWORD = "NQi49w8dTU4mFLCc"
+PASSWORD = "Ria'sClaroty12729"
 
 class CTDClient:
     def __init__(self):
