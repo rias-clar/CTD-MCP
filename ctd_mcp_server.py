@@ -3,6 +3,8 @@ import json
 import requests
 import urllib3
 from mcp.server.fastmcp import FastMCP
+from dotenv import load_dotenv
+
 
 # Disable SSL warnings for self-signed certificates or test environments
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -10,10 +12,10 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 # Initialize FastMCP Server
 mcp = FastMCP("Claroty CTD Bridge")
 
-# Hardcoded environment parameters as provided
-CTD_HOST = "192.168.1.215"
-USERNAME = "admin"
-PASSWORD = "Ria'sClaroty12729"
+load_dotenv()
+CTD_HOST = os.getenv("ctd_host")
+USERNAME = os.getenv("username")
+PASSWORD = os.getenv("password")
 
 class CTDClient:
     def __init__(self):
