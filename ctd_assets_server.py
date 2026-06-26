@@ -9,9 +9,9 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 mcp = FastMCP("Claroty CTD Assets Core")
 
-CTD_HOST = "site-tender-python-1.knwlkgvw.demotapp.com"
-USERNAME = "admin"
-PASSWORD = "NQi49w8dTU4mFLCc"
+CTD_HOST = ""
+USERNAME = ""
+PASSWORD = ""
 
 class CTDClient:
     def __init__(self):
