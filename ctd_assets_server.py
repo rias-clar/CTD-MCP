@@ -3,15 +3,18 @@ import json
 import requests
 import urllib3
 from mcp.server.fastmcp import FastMCP
+from dotenv import load_dotenv
 
 # Disable SSL warnings
+
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 mcp = FastMCP("Claroty CTD Assets Core")
 
-CTD_HOST = ""
-USERNAME = ""
-PASSWORD = ""
+load_dotenv()
+CTD_HOST = os.getenv("ctd_host")
+USERNAME = os.getenv("username")
+PASSWORD = os.getenv("password")
 
 class CTDClient:
     def __init__(self):
