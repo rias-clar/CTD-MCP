@@ -25,7 +25,7 @@ class CTDClient:
         """Authenticates with CTD based on the /auth/authenticate spec."""
         url = f"{self.base_url}/auth/authenticate"
         payload = {"username": USERNAME, "password": PASSWORD}
-        headers = {'Content-type': 'application/json'}
+        headers = {'Content-type': 'application/json'} #, 'Accept': 'text/plain'}
         
         response = requests.post(url, json=payload, headers=headers, verify=False)
         response.raise_for_status()
