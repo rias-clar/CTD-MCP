@@ -1,6 +1,8 @@
 from mcp.server.fastmcp import FastMCP
 from src.client import CTDClient
 from src.modules.assets import AssetsModule
+from src.modules.vulnerabilities import VulnerabilitiesModule
+
 
 # 1. Initialize the FastMCP Server
 # This name will appear in MCP clients (ie, Ollama)
@@ -16,7 +18,7 @@ def main():
         # APPEND TO LIST WITH NEW MODULES AS THEY ARE CREATED!!!
         modules = [
             AssetsModule(client=client),
-            # VulnerabilitiesModule(client=client), 
+            VulnerabilitiesModule(client=client), 
         ]
 
         # 4. Explicitly Register Tools
