@@ -1,0 +1,37 @@
+from mcp.server.fastmcp import FastMCP
+from src.client import CTDClient
+from src.modules.assets import AssetsModule
+
+# 1. Initialize the FastMCP Server
+# This name will appear in MCP clients (ie, Ollama)
+mcp = FastMCP("Claroty CTD MCP Server")
+
+def main():
+    try:
+        # 2. Initialize the API Client
+        # This will automatically pull credentials from .env file
+        client = CTDClient()
+
+        # 3. Instantiate Modules
+        # APPEND TO LIST WITH NEW MODULES AS THEY ARE CREATED!!!
+        modules = [
+            AssetsModule(client=client),
+            # VulnerabilitiesModule(client=client), 
+        ]
+
+        # 4. Explicitly Register Tools
+        # This loops through all active modules and connects their tools into FastMCP
+        for module in modules:
+            module.register_tools(mcp)
+
+        # 5. Start the server
+        # FastMCP defaults to standard input/output (stdio) transport, (required for CLI tools)
+        mcp.run()
+        
+    except ValueError as e:
+        print(f"Configuration Error: {e}")
+    except Exception as e:
+        print(f"Failed to start MCP server: {e}")
+
+if __name__ == "__main__":
+    main()
