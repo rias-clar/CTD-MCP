@@ -29,6 +29,10 @@ def main():
         # 5. Start the server
         # FastMCP defaults to standard input/output (stdio) transport, (required for CLI tools)
         mcp.run()
+
+        # 6. Start server via HTTP for Web UIs
+        # for later integration with OpenWeb UI
+        # mcp.run(transport='sse', host ='0.0.0.0', port=8000)
         
     except ValueError as e:
         print(f"Configuration Error: {e}")
