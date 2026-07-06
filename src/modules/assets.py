@@ -9,6 +9,7 @@ class AssetsModule(BaseModule):
 
     def register_tools(self, server: FastMCP) -> None:
         self._add_tool(server, self.search_assets, "search_assets")
+        self._add_tool(server, self.search_assets_optim, "search_assets_optim")
         self._add_tool(server, self.get_asset_details, "get_asset_details")
         self._add_tool(server, self.get_vulnerable_assets, "get_vulnerable_assets")
 
@@ -46,6 +47,78 @@ class AssetsModule(BaseModule):
                 return "No assets found matching those criteria."
 
             return json.dumps(objects, indent=2)
+            
+        except Exception as e:
+            return f"Error searching assets: {str(e)}"
+        
+
+    def search_assets_optim(
+        self,
+        filters: dict[str, str | int | bool] | None = Field(
+            default=None,
+            description="Dictionary of filters (e.g., {'vendor__icontains': 'Rockwell'}). MUST strictly use keys defined in resource://ctd/assets-schema."
+        ),
+        fields: list[str] = Field(
+            default=["id", "name", "ipv4", "ipv6", "mac", "vendor", "model", "firmware", "asset_type", "risk_level"],
+            description="List of exact field names to return. ONLY return the fields EXPLICITLY REQUESTED by the user. Do NOT hallucinate your own fields. MUST strictly match the keys in resource://ctd/assets-schema."
+        ),
+        page: int = Field(default=1, description="The starting page number."),
+        per_page: int = Field(default=500, description="Number of assets to pull per page (Recommended maximum 500)."),
+        auto_paginate: bool = Field(
+            default=True, 
+            description="If True, automatically fetches all pages until all assets are retrieved."
+        )
+    ) -> str:
+        """
+        Searches for network assets in the CTD environment using V1 endpoint parameters.
+        Consult resource://ctd/assets-schema to see all available filters and fields.
+        """
+        try:
+            # Base parameters including your required defaults
+            params = {
+                'per_page': per_page,
+                'page': page,
+                'special_hint__exact': 0,
+                'valid__exact': True,
+                'ghost__exact': False,
+                # Since 'fields' now always defaults to a list, we can just join it immediately!
+                'fields': ",;$".join(fields)
+            }
+
+            # Dynamically apply LLM filters
+            if filters:
+                for key, value in filters.items():
+                    # Prevents the LLM from accidentally overriding the enforced special_hint default
+                    # It CAN override valid__exact or ghost__exact if the user explicitly asks for invalid/ghost assets
+                    if key != 'special_hint__exact':
+                        params[key] = value
+
+            all_objects = []
+            current_page = page
+
+            # Pagination Loop
+            while True:
+                params['page'] = current_page
+                
+                # Using the V1 endpoint as strictly requested
+                data = self.client.request("GET", "/ranger/assets", params=params)
+                objects = data.get('objects', [])
+                
+                if not objects:
+                    break
+
+                all_objects.extend(objects)
+
+                # Stop if auto_paginate is False, or if the returned objects are less than per_page
+                if not auto_paginate or len(objects) < per_page:
+                    break
+                    
+                current_page += 1
+
+            if not all_objects:
+                return "No assets found matching those criteria."
+
+            return json.dumps(all_objects, indent=2)
             
         except Exception as e:
             return f"Error searching assets: {str(e)}"
