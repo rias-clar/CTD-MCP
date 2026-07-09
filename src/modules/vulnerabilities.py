@@ -80,7 +80,7 @@ class VulnerabilitiesModule(BaseModule):
             if not objects:
                 return "No asset-vulnerability matches found for those criteria."
 
-            # Flatten to save tokens and highlight the relationship
+            # Flatten 
             matches = []
             for match in objects:
                 matches.append({

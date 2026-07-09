@@ -1,8 +1,7 @@
-from mcp.server.fastmcp import FastMCP
+from fastmcp import FastMCP
 from src.client import CTDClient
 from src.modules.assets import AssetsModule
 from src.modules.vulnerabilities import VulnerabilitiesModule
-from src.resources.assets_resource import register_assets_resource
 
 # 1. Initialize the FastMCP Server
 # This name will appear in MCP clients (ie, Ollama)
@@ -18,18 +17,16 @@ def main():
         # APPEND TO LIST WITH NEW MODULES AS THEY ARE CREATED!!!
         modules = [
             AssetsModule(client=client),
-            VulnerabilitiesModule(client=client), 
+            #VulnerabilitiesModule(client=client), 
         ]
 
         # 4. Explicitly Register Tools
         # This loops through all active modules and connects their tools into FastMCP
         for module in modules:
             module.register_tools(mcp)
+            module.register_resources(mcp)
 
-        # 5. Register Assets Resource
-        register_assets_resource(mcp)
-
-        # 6. Start the server
+        # 5. Start the server
         # FastMCP defaults to standard input/output (stdio) transport, (required for CLI tools)
         mcp.run()
 

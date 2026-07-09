@@ -2,6 +2,7 @@ import os
 import requests
 import urllib3
 from dotenv import load_dotenv
+from typing import Any, Dict, List, Optional
 
 # Disable SSL warnings for internal network appliances
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
