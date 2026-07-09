@@ -1,10 +1,10 @@
-from http import server
 import json
+from typing import Any, Optional
 from pydantic import Field, AnyUrl
-from typing import Optional
-from mcp.server import FastMCP
-from mcp.server.fastmcp.resources import TextResource
-from mcp.types import ToolAnnotations
+
+from fastmcp import FastMCP
+from mcp.types import TextResource, ToolAnnotations
+
 from src.modules.base import BaseModule
 from src.resources.assets import ASSETS_SCHEMA_URI, ASSETS_SCHEMA_DOCS
 
