@@ -1,4 +1,5 @@
-from fastmcp import FastMCP
+import sys
+from mcp.server.fastmcp import FastMCP
 from src.client import CTDClient
 from src.modules.assets import AssetsModule
 from src.modules.vulnerabilities import VulnerabilitiesModule
@@ -35,9 +36,9 @@ def main():
         # mcp.run(transport='sse', host ='0.0.0.0', port=8000)
         
     except ValueError as e:
-        print(f"Configuration Error: {e}")
+        sys.stderr.write(f"Configuration Error: {e}\n")
     except Exception as e:
-        print(f"Failed to start MCP server: {e}")
+        sys.stderr.write(f"Failed to start MCP server: {e}\n")
 
 if __name__ == "__main__":
     main()

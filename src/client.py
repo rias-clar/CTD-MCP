@@ -9,7 +9,11 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 class CTDClient:
     def __init__(self):
-        load_dotenv()
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        root_dir = os.path.dirname(current_dir)
+        env_path = os.path.join(root_dir, '.env')
+        
+        load_dotenv(dotenv_path=env_path)
         self.host = os.getenv("ctd_host")
         self.username = os.getenv("username")
         self.password = os.getenv("password")
@@ -42,7 +46,7 @@ class CTDClient:
             return self.authenticate()
         return {'Authorization': self.token}
 
-    def request(self, method: str, endpoint: str, params: dict = None) -> dict:
+    def request(self, method: str, endpoint: str, params: Optional[dict] = None) -> dict:
         """Helper to handle self-healing token retries automatically."""
         headers = self.get_headers()
         url = f"{self.base_url}{endpoint}"

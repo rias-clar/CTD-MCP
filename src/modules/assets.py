@@ -2,7 +2,7 @@ import json
 from typing import Any, Optional
 from pydantic import Field, AnyUrl
 
-from fastmcp import FastMCP
+from mcp.server.fastmcp import FastMCP
 from mcp.types import TextResource, ToolAnnotations
 
 from src.modules.base import BaseModule

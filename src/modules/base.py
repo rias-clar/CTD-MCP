@@ -1,7 +1,15 @@
 from typing import Callable, Any
-from fastmcp import FastMCP
+from mcp.server.fastmcp import FastMCP
 from mcp.types import Resource, ToolAnnotations
 from src.client import CTDClient
+
+# Default Annotations for Read-Only Tools
+READ_ONLY_ANNOTATIONS = ToolAnnotations(
+    readOnlyHint=True,
+    destructiveHint=False,
+    idempotentHint=True,
+    openWorldHint=False, #CTD is closed
+)
 
 class BaseModule:
     def __init__(self, client: CTDClient) -> None:
@@ -32,7 +40,7 @@ class BaseModule:
         server.add_tool(
             method,
             name=prefixed_name,
-            annotations=annotations,
+            annotations=annotations or READ_ONLY_ANNOTATIONS,
             structured_output=False,
         )
         self.tools.append(prefixed_name)
