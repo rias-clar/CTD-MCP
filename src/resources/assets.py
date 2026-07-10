@@ -12,7 +12,7 @@ Unless otherwise specified by the user, the tool automatically applies these def
 * `ghost__exact`: `false` (Excludes ghost/receive-only assets)
 * `valid__exact`: `true` (Only returns valid assets)
 * `approved__exact`: `true` (Only returns approved assets)
-* `special_hint__exact`: `0` (Defaults to unicast. Enums: 0=unicast, 1=broadcast, 2=multicast, 3=mitm virtual, 4=external)
+* `special_hint__exact`: `0` (Defaults to unicast. Enums: 0=unicast, 1=broadcast, 2=multicast, 3=out of scope, 4=external)
 
 ---
 
@@ -39,6 +39,8 @@ Use these keys in the `filters` dictionary. Match the data types exactly.
 | `purdue_level__exact`| String | Purdue model level. **Enums:** `"0"`, `"1"`, `"1.5"`, `"2"`, `"2.5"`, `"3"`, `"3.5"`, `"4"`, `"5"`, `"6"`. | `"3"` |
 | `last_seen__exact` | String | ISO 8601 Timestamp of last observation. | `"2023-10-27T10:00:00Z"` |
 | `site_id__exact` | Integer | Unique identifier for the physical/logical site. | `1` |
+| `special_hint__exact` | Integer | Address type of the asset. **Enums:** `0` (unicast), `1` (broadcast), `2` (multicast), `3` (out of scope), `4` (external). | `0` |
+
 
 ---
 

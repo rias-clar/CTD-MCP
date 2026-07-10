@@ -13,7 +13,6 @@ class AssetsModule(BaseModule):
     """Handles asset discovery, deep-dives, and posture assessment using CTD V1 APIs."""
 
     def register_tools(self, server: FastMCP) -> None:
-        # self._add_tool(server, self.search_assets, "search_assets")
         self._add_tool(
                 server=server, 
                 method=self.search_assets, 
@@ -40,45 +39,6 @@ class AssetsModule(BaseModule):
         )
         
         self._add_resource(server, resource)
-
-
-    # def search_assets(
-    #     self,
-    #     ip_address: Optional[str] = Field(default=None, description="Exact IPv4 address filter."),
-    #     mac_address: Optional[str] = Field(default=None, description="MAC address filter (contains)."),
-    #     vendor: Optional[str] = Field(default=None, description="Vendor name filter (contains)."),
-    #     risk_level: Optional[int] = Field(default=None, description="Exact risk level integer filter."),
-    #     fields: Optional[str] = Field(
-    #         default="resource_id,;$name,;$ipv4,;$mac,;$vendor,;$risk_level,;$purdue_level,;$asset_type__", 
-    #         description="Claroty formatted string of fields to return. Separator is ',;$'"
-    #     )
-    # ) -> str:
-    #     """
-    #     Searches for network assets in the CTD environment using the /ranger/assets (v1) endpoint.
-    #     If no filters are provided, it returns the first 100 results.
-    #     """
-    #     try:
-    #         params = {
-    #             'per_page': 100,  # Keeping it reasonable for LLM context limits
-    #             'fields': fields
-    #         }
-            
-    #         # Map intuitive arguments to exact OpenAPI query parameters
-    #         if ip_address: params['ipv4__exact'] = ip_address
-    #         if mac_address: params['mac__icontains'] = mac_address
-    #         if vendor: params['vendor__icontains'] = vendor
-    #         if risk_level is not None: params['risk_level__exact'] = risk_level
-
-    #         data = self.client.request("GET", "/ranger/assets", params=params)
-    #         objects = data.get('objects', [])
-            
-    #         if not objects:
-    #             return "No assets found matching those criteria."
-
-    #         return json.dumps(objects, indent=2)
-            
-    #     except Exception as e:
-    #         return f"Error searching assets: {str(e)}"
         
     def search_assets(
             self,
@@ -107,34 +67,30 @@ class AssetsModule(BaseModule):
             enum values.
             """
             try:
-                # --- 1. Input Validation & Parameter Setup ---
-                # Clean fields to ensure no accidental whitespace or empty strings crash the API
+                # Input Validation 
                 clean_fields = [str(f).strip() for f in fields if str(f).strip()]
                 if not clean_fields:
-                    clean_fields = ["id", "name", "ipv4", "mac", "asset_type"] # Safe fallback
+                    clean_fields = ["id", "name", "ipv4", "mac", "asset_type"] # Default fallback
 
-                # Base parameters enforcing mandatory CTD rules
+                # Base default parameters
                 params: dict[str, Any] = {
-                    'special_hint__exact': 0,  # Enforce unicast
+                    'special_hint__exact': 0,  # Default to unicast
                     'valid__exact': True,      # Default to valid assets
                     'ghost__exact': False,     # Default to non-ghost assets
                     'approved__exact': True,   # Default to approved assets
                     'fields': ",;$".join(clean_fields)
                 }
 
-                # Safely apply LLM filters
+                # Apply LLM filters
                 if filters:
-                    for key, value in filters.items():
-                        # Protect this critical system default from being overridden
-                        if key == 'special_hint__exact':
-                            continue  
+                    for key, value in filters.items(): 
                         params[key] = value
 
-                # --- 2. Pagination & Execution Logic ---
+                # Pagination
                 all_objects = []
                 current_page = 1
                 
-                # Smart chunking: only fetch what we need
+                # Chunking
                 per_page = min(limit, 500) if limit is not None else 500
                 params['per_page'] = per_page
 
@@ -151,12 +107,12 @@ class AssetsModule(BaseModule):
                     all_objects.extend(objects)
 
                     # Stop Conditions:
-                    # A. We hit or exceeded the requested limit
+                    # Hit or exceeded the requested limit:
                     if limit is not None and len(all_objects) >= limit:
                         all_objects = all_objects[:limit] # Truncate to exact requested limit
                         break
                     
-                    # B. We received fewer items than requested, meaning we reached the end of the database
+                    # Reached the end of the database:
                     if len(objects) < per_page:
                         break
                         
@@ -165,14 +121,14 @@ class AssetsModule(BaseModule):
                 if not all_objects:
                     return "No assets found matching the specified criteria."
 
-                # --- 3. Output Token Optimization ---
-                # Strip key-value pairs where the value is None, "", or [] to save massive token overhead
+                # Output Token Optimization
+                # Strip key-value pairs where the value is None, "", or []
                 optimized_objects = []
                 for obj in all_objects:
                     cleaned_obj = {k: v for k, v in obj.items() if v not in (None, "", [], {})}
                     optimized_objects.append(cleaned_obj)
 
-                # Minify JSON serialization (removes all unnecessary spaces and newlines)
+                # Clean JSON serialization, remove all unnecessary spaces and newlines
                 return json.dumps(optimized_objects, separators=(',', ':'))
 
             except Exception as e:

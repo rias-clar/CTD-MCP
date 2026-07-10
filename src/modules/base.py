@@ -35,7 +35,7 @@ class BaseModule:
         name: str,
         annotations: ToolAnnotations | None = None
     ) -> None:
-        """Programmatically registers a class method as an MCP tool using native add_tool."""
+        """Programmatically registers a class method as an MCP tool using add_tool."""
         prefixed_name = f"ctd_{name}"
         server.add_tool(
             method,
