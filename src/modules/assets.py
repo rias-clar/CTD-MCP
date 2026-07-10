@@ -3,7 +3,8 @@ from typing import Any, Optional
 from pydantic import Field, AnyUrl
 
 from mcp.server.fastmcp import FastMCP
-from mcp.types import TextResource, ToolAnnotations
+from mcp.types import ToolAnnotations
+from mcp.server.fastmcp.resources import TextResource
 
 from src.modules.base import BaseModule
 from src.resources.assets import ASSETS_SCHEMA_URI, ASSETS_SCHEMA_DOCS
