@@ -2,7 +2,7 @@ import json
 from typing import Any, Optional
 from pydantic import Field, AnyUrl
 
-from mcp.server.fastmcp import FastMCP–
+from mcp.server.fastmcp import FastMCP
 from mcp.types import ToolAnnotations
 from mcp.server.fastmcp.resources import TextResource
 
@@ -24,7 +24,17 @@ class AssetsModule(BaseModule):
                     openWorldHint=False,
                 )
         )        
-        self._add_tool(server, self.get_asset_details, "get_asset_details")
+        self._add_tool(
+                server=server, 
+                method=self.get_asset_details, 
+                name="get_asset_details",
+                annotations=ToolAnnotations(
+                    readOnlyHint=True,
+                    destructiveHint=False,
+                    idempotentHint=True,
+                    openWorldHint=False,
+                )
+        )
         self._add_tool(server, self.get_vulnerable_assets, "get_vulnerable_assets")
 
     def register_resources(self, server: FastMCP) -> None:
