@@ -2,7 +2,7 @@ import json
 from typing import Any, Optional
 from pydantic import Field, AnyUrl
 
-from mcp.server.fastmcp import FastMCP
+from mcp.server.fastmcp import FastMCP–
 from mcp.types import ToolAnnotations
 from mcp.server.fastmcp.resources import TextResource
 
@@ -129,24 +129,81 @@ class AssetsModule(BaseModule):
                     optimized_objects.append(cleaned_obj)
 
                 # Clean JSON serialization, remove all unnecessary spaces and newlines
+                # EDIT INTO MD
                 return json.dumps(optimized_objects, separators=(',', ':'))
 
             except Exception as e:
                 return f"Error searching assets: {str(e)}"
 
     def get_asset_details(
-        self, 
-        resource_id: str = Field(description="The exact 'resource_id' of the asset (e.g., '179-1').")
+        self,
+        asset_identifier: str | int = Field(
+            description="The numerical asset ID (e.g., 179) or full resource ID with the site ID hyphenated to the asset ID. (e.g., '179-1').",
+            examples=["179-1", "402", 79]
+        ),
+        fields: list[str] = Field(
+            default=["id", "name", "ipv4", "ipv6", "mac", "vendor", "model", "firmware", "asset_type", "risk_level"],
+            description="List of requested asset fields. Consult resource://ctd/assets-schema for available fields. Defaults to standard identity and network fields if.",
+            examples=[["id", "hostname", "ipv4", "vulnerabilities"]]
+        )
     ) -> str:
-        """
-        Retrieves the complete, unfiltered diagnostic profile of a single asset.
-        Use this when a deep-dive into a specific asset's full metadata is needed.
+        """Retrieve the diagnostic profile of a specific network asset.
+
+        Use this to query a single asset by its ID for its details. 
+        Consult resource://ctd/assets-schema for available return fields. 
+        Returns the full asset record including device details, network 
+        configuration, and risk level.
         """
         try:
-            data = self.client.request("GET", f"/ranger/assets/{resource_id}")
-            return json.dumps(data, indent=2)
+            # 1. Identifier Validation & Construction
+            identifier_str = str(asset_identifier).strip()
+            
+            if not identifier_str:
+                return "Error: Invalid asset identifier provided."
+                
+            # If the LLM passes a plain asset_id (no hyphen), assume site 1
+            if "-" in identifier_str:
+                final_resource_id = identifier_str
+            else:
+                final_resource_id = f"{identifier_str}-1"
+
+            # 2. Field Validation
+            clean_fields = [str(f).strip() for f in fields if str(f).strip()]
+            if not clean_fields:
+                clean_fields = ["id", "name", "ipv4", "mac", "asset_type"] # Default fallback
+
+            params: dict[str, Any] = {
+                'fields': ",;$".join(clean_fields)
+            }
+
+            # 3. Fetch from V1 endpoint
+            response_data = self.client.request("GET", f"/ranger/assets/{final_resource_id}", params=params)
+
+            if not response_data:
+                return f"No asset found matching resource_id: {final_resource_id}"
+
+            # 4. Output Token Optimization
+            cleaned_obj = {k: v for k, v in response_data.items() if v not in (None, "", [], {})}
+
+            # Clean JSON serialization
+            return json.dumps(cleaned_obj, separators=(',', ':'))
+
         except Exception as e:
-            return f"Error fetching details for asset {resource_id}: {str(e)}"
+            return f"Error fetching details for asset {final_resource_id if 'final_resource_id' in locals() else 'Unknown'}: {str(e)}"
+
+    # def get_asset_details(
+    #     self, 
+    #     resource_id: str = Field(description="The exact 'resource_id' of the asset (e.g., '179-1').")
+    # ) -> str:
+    #     """
+    #     Retrieves the complete, unfiltered diagnostic profile of a single asset.
+    #     Use this when a deep-dive into a specific asset's full metadata is needed.
+    #     """
+    #     try:
+    #         data = self.client.request("GET", f"/ranger/assets/{resource_id}")
+    #         return json.dumps(data, indent=2)
+    #     except Exception as e:
+    #         return f"Error fetching details for asset {resource_id}: {str(e)}"
 
     def get_vulnerable_assets(
         self,
