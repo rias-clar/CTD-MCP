@@ -35,7 +35,7 @@ class AssetsModule(BaseModule):
                     openWorldHint=False,
                 )
         )
-        self._add_tool(server, self.get_vulnerable_assets, "get_vulnerable_assets")
+        # self._add_tool(server, self.get_vulnerable_assets, "get_vulnerable_assets")
 
     def register_resources(self, server: FastMCP) -> None:
         """Register the static schema resources with the MCP Server."""
@@ -215,34 +215,34 @@ class AssetsModule(BaseModule):
     #     except Exception as e:
     #         return f"Error fetching details for asset {resource_id}: {str(e)}"
 
-    def get_vulnerable_assets(
-        self,
-        cve_id: Optional[str] = Field(default=None, description="Filter by a specific CVE ID (e.g., 'CVE-2019-12260')."),
-        fields: Optional[str] = Field(
-            default="resource_id,;$name,;$ipv4,;$risk_level,;$total_cves_count,;$insights", 
-            description="Claroty formatted string of fields to return. Separator is ',;$'"
-        )
-    ) -> str:
-        """
-        Retrieves a list of assets that have active Insights/Vulnerabilities.
-        This queries the /ranger/assets_with_insights endpoint.
-        """
-        try:
-            params = {
-                'per_page': 50,
-                'fields': fields
-            }
+    # def get_vulnerable_assets(
+    #     self,
+    #     cve_id: Optional[str] = Field(default=None, description="Filter by a specific CVE ID (e.g., 'CVE-2019-12260')."),
+    #     fields: Optional[str] = Field(
+    #         default="resource_id,;$name,;$ipv4,;$risk_level,;$total_cves_count,;$insights", 
+    #         description="Claroty formatted string of fields to return. Separator is ',;$'"
+    #     )
+    # ) -> str:
+    #     """
+    #     Retrieves a list of assets that have active Insights/Vulnerabilities.
+    #     This queries the /ranger/assets_with_insights endpoint.
+    #     """
+    #     try:
+    #         params = {
+    #             'per_page': 50,
+    #             'fields': fields
+    #         }
             
-            if cve_id:
-                params['insight_cve_id__exact'] = cve_id
+    #         if cve_id:
+    #             params['insight_cve_id__exact'] = cve_id
 
-            data = self.client.request("GET", "/ranger/assets_with_insights", params=params)
-            objects = data.get('objects', [])
+    #         data = self.client.request("GET", "/ranger/assets_with_insights", params=params)
+    #         objects = data.get('objects', [])
             
-            if not objects:
-                return "No highly vulnerable assets found matching criteria."
+    #         if not objects:
+    #             return "No highly vulnerable assets found matching criteria."
 
-            return json.dumps(objects, indent=2)
+    #         return json.dumps(objects, indent=2)
             
-        except Exception as e:
-            return f"Error fetching vulnerable assets: {str(e)}"
+    #     except Exception as e:
+    #         return f"Error fetching vulnerable assets: {str(e)}"
