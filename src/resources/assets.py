@@ -34,6 +34,7 @@ Use these keys in the `filters` dictionary. Match the data types exactly.
 | `firmware__exact` | String | Exact firmware version. | `"v20.011"` |
 | `serial__exact` | String | Exact hardware serial number. | `"SN-12345678"` |
 | `protocol__exact` | String | Network protocol used. | `"Modbus"` or `"DNP3"` |
+| `relevance__exact`| Integer | Asset vulnerability status. **Enums:** `0` (Potentially Relevant), `1` (Confirmed). | `1` |
 | `risk_level__exact` | Integer | CTD calculated risk for asset, based on vulnerabilities, insights, alerts, etc. **Enums:** `0` (Low), `1` (Medium), `2` (High), `3` (Critical). | `3` |
 | `criticality__exact` | Integer | Value representing how critical the asset is to the operation/environment. **Enums:** `0` (eLow), `1` (eMedium), `2` (eHigh). | `2` |
 | `purdue_level__exact`| String | Purdue model level. **Enums:** `"0"`, `"1"`, `"1.5"`, `"2"`, `"2.5"`, `"3"`, `"3.5"`, `"4"`, `"5"`, `"6"`. | `"3"` |
