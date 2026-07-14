@@ -59,8 +59,7 @@ class AssetsModule(BaseModule):
         
     def search_assets(
             self,
-            filters: dict[str, str | int | bool] | None = Field(
-                default=None,
+            filters: dict[str, str | int | bool | list[str | int]] | None = Field(                default=None,
                 description="Dictionary of search filters. Consult resource://ctd/assets-schema for allowed filter keys, data types, and enum mappings.",
                 examples=[{"vendor__icontains": "Rockwell", "risk_level__exact": 3}],
             ),
@@ -101,7 +100,10 @@ class AssetsModule(BaseModule):
                 # Apply LLM filters
                 if filters:
                     for key, value in filters.items(): 
-                        params[key] = value
+                        if isinstance(value, list):
+                            params[key] = ",;$".join(str(v).strip() for v in value)
+                        else:
+                            params[key] = value
 
                 # Pagination
                 all_objects = []

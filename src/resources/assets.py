@@ -18,6 +18,7 @@ Unless otherwise specified by the user, the tool automatically applies these def
 
 ## 2. Allowed Search Filters
 Use these keys in the `filters` dictionary. Match the data types exactly.
+For any filter marked with **Enums**, you may pass a single value or a JSON array of multiple values to perform an "OR" search (e.g., `"purdue_level__exact": ["1", "1.5", "2"]`).
 
 | Filter Key | Type | Description | Example |
 | :--- | :--- | :--- | :--- |
@@ -25,7 +26,7 @@ Use these keys in the `filters` dictionary. Match the data types exactly.
 | `ipv6__exact` | String | Exact IPv6 address. | `"2001:0db8:85a3::8a2e:0370:7334"` |
 | `mac__icontains` | String | Partial or full MAC address. | `"00:1A:2B"` or `"00:1A:2B:3C:4D:5E"` |
 | `vlan__exact` | String | Exact VLAN identifier. | `"100"` |
-| `asset_type__exact` | Integer | Specific asset classification ID. *(See Asset Type Enums below)* | `12` (for eSwitch) |
+| `asset_type__exact` | Integer | Specific asset classification ID. *(See Asset Type **Enums** below)* | `12` (for eSwitch) |
 | `class_type__exact` | Integer | Asset class ID. **Enums:** `0` (OT), `1` (IT), `2` (IoT). | `0` |
 | `display_name__icontains` | String | Matches asset name, hostname, or display name. | `"Engineering Workstation"` |
 | `os__exact` | String | Exact operating system name. | `"Windows 10"` |
