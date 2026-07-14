@@ -55,6 +55,7 @@ Only request the fields necessary to answer the user's prompt. Do not request fi
 * **Risk & Posture:** `risk_level`, `risk_score`, `criticality`, `num_alerts`, `insight_names`
 * **Software/State:** `installed_antivirus`, `patch_count`, `installed_programs_count`, `plc_slots`, `state`, `domain_workgroup`
 * **Status:** `approved`, `valid`, `ghost`, `timestamp`, `first_seen`, `last_seen`
+* **Details/Custom Information:** `custom_informations`, `custom_attributes`
 
 ---
 

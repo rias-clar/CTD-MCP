@@ -1,4 +1,6 @@
+import json
 import os
+import sys
 import requests
 import urllib3
 from dotenv import load_dotenv
@@ -14,10 +16,10 @@ class CTDClient:
         env_path = os.path.join(root_dir, '.env')
         
         load_dotenv(dotenv_path=env_path)
-        self.host = os.getenv("ctd_host")
-        self.username = os.getenv("username")
-        self.password = os.getenv("password")
-        
+        self.host = os.getenv("CTD_HOST")
+        self.username = os.getenv("CTD_USERNAME")
+        self.password = os.getenv("CTD_PASSWORD")
+
         if not all([self.host, self.username, self.password]):
             raise ValueError("Missing CTD credentials in environment variables.")
 
@@ -27,9 +29,10 @@ class CTDClient:
     def authenticate(self) -> dict:
         """Authenticates with CTD based on the /auth/authenticate spec."""
         url = f"{self.base_url}/auth/authenticate"
+
         payload = {"username": self.username, "password": self.password}
         headers = {'Content-type': 'application/json'}
-        
+
         response = requests.post(url, json=payload, headers=headers, verify=False)
         response.raise_for_status()
         
@@ -51,7 +54,12 @@ class CTDClient:
         headers = self.get_headers()
         url = f"{self.base_url}{endpoint}"
         
-        response = requests.request(method, url, headers=headers, params=params, verify=False)
+        response = requests.request(
+            method, 
+            url, 
+            headers=headers, 
+            params=params,   
+            verify=False)
         
         # Self-healing: if token expired, re-auth and try exactly once more
         if response.status_code == 401:
