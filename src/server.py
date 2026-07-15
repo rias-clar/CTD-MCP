@@ -5,6 +5,7 @@ from src.modules.assets import AssetsModule
 from src.modules.vulnerabilities import VulnerabilitiesModule
 
 # Initialize the FastMCP Server
+# edit for when running local
 mcp = FastMCP("Claroty CTD MCP Server")
 
 def main():
@@ -28,7 +29,7 @@ def main():
         mcp.run()
 
         # Start server via HTTP for Web UIs, for later integration with OpenWeb UI
-        # mcp.run(transport='sse', host ='0.0.0.0', port=8000)
+        #mcp.run(transport='sse')
         
     except ValueError as e:
         sys.stderr.write(f"Configuration Error: {e}\n")
