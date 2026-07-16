@@ -59,7 +59,8 @@ class AssetsModule(BaseModule):
         
     def search_assets(
             self,
-            filters: dict[str, str | int | bool | list[str | int]] | None = Field(                default=None,
+            filters: dict[str, str | int | bool | list[str | int]] | None = Field(                
+                default=None,
                 description="Dictionary of search filters. Consult resource://ctd/assets-schema for allowed filter keys, data types, and enum mappings.",
                 examples=[{"vendor__icontains": "Rockwell", "risk_level__exact": 3}],
             ),
@@ -162,7 +163,7 @@ class AssetsModule(BaseModule):
         ),
         fields: list[str] = Field(
             default=["id", "name", "ipv4", "ipv6", "mac", "vendor", "model", "firmware", "asset_type", "risk_level"],
-            description="List of requested asset fields. Consult resource://ctd/assets-schema for available fields. Defaults to standard identity and network fields if.",
+            description="List of requested asset fields. Consult resource://ctd/assets-schema for available fields. Defaults to standard identity and network fields if omitted.",
             examples=[["id", "hostname", "ipv4", "vulnerabilities"]]
         )
     ) -> str:
