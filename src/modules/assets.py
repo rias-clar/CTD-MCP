@@ -20,6 +20,19 @@ class AssetsModule(BaseModule):
     """
 
     def register_tools(self, server: FastMCP) -> None:
+        #ADDING TOOL FOR RESOURCE PULLING:
+        self._add_tool(
+                server=server, 
+                method=self.get_assets_schema, 
+                name="get_assets_schema",
+                annotations=ToolAnnotations(
+                    readOnlyHint=True,
+                    destructiveHint=False,
+                    idempotentHint=True,
+                    openWorldHint=False,
+                )
+        )
+
         self._add_tool(
                 server=server, 
                 method=self.search_assets, 
@@ -57,16 +70,27 @@ class AssetsModule(BaseModule):
         
         self._add_resource(server, resource)
         
+    #ADDING TOOL FOR ASSETS SCHEMA
+    def get_assets_schema(self) -> str:
+        """Retrieves the complete Claroty CTD Assets Search Schema, Filter Keys, and Guide.
+        
+        Call this tool BEFORE executing search_assets if you need to look up 
+        allowed filter keys, required data types, integer enum mappings, or return fields.
+        """
+        return ASSETS_SCHEMA_DOCS
+
     def search_assets(
             self,
             filters: dict[str, str | int | bool | list[str | int]] | None = Field(                
                 default=None,
-                description="Dictionary of search filters. Consult resource://ctd/assets-schema for allowed filter keys, data types, and enum mappings.",
+                #description="Dictionary of search filters. Consult resource://ctd/assets-schema for allowed filter keys, data types, and enum mappings.",
+                description="Dictionary of search filters. Call the `get_assets_schema` tool to find allowed filter keys, data types, and enum mappings.",
                 examples=[{"vendor__icontains": "Rockwell", "risk_level__exact": 3}],
             ),
             fields: list[str] = Field(
                 default=["id", "name", "ipv4", "ipv6", "mac", "vendor", "model", "firmware", "asset_type", "risk_level"],
-                description="List of requested asset fields. Consult resource://ctd/assets-schema for available fields. Defaults to a standard set of identity and network fields if omitted.",
+                #description="List of requested asset fields. Consult resource://ctd/assets-schema for available fields. Defaults to a standard set of identity and network fields if omitted.",
+                description="List of requested asset fields. Call the `get_assets_schema` tool for available fields. Defaults to a standard set of identity and network fields if omitted.",
                 examples=[["id", "hostname", "ipv4", "vulnerabilities"]],
             ),
             limit: int | None = Field(
@@ -79,7 +103,7 @@ class AssetsModule(BaseModule):
             """Find network assets by specified criteria and return their details.
 
             Use this tool to discover assets based on identity, location, risk score, 
-            or hardware classification. Consult resource://ctd/assets-schema before 
+            or hardware classification. Call the `get_assets_schema` tool before 
             constructing filter expressions to ensure correct data types and integer 
             enum values.
             """
@@ -163,14 +187,15 @@ class AssetsModule(BaseModule):
         ),
         fields: list[str] = Field(
             default=["id", "name", "ipv4", "ipv6", "mac", "vendor", "model", "firmware", "asset_type", "risk_level"],
-            description="List of requested asset fields. Consult resource://ctd/assets-schema for available fields. Defaults to standard identity and network fields if omitted.",
+            #description="List of requested asset fields. Consult resource://ctd/assets-schema for available fields. Defaults to standard identity and network fields if omitted.",
+            description="List of requested asset fields. Call the `get_assets_schema` tool for available fields. Defaults to a standard set of identity and network fields if omitted.",
             examples=[["id", "hostname", "ipv4", "vulnerabilities"]]
         )
     ) -> str:
         """Retrieve the diagnostic profile of a specific network asset.
 
         Use this to query a single asset by its ID for its details. 
-        Consult resource://ctd/assets-schema for available return fields. 
+        Call the `get_assets_schema` tool for available return fields. 
         Returns the full asset record including device details, network 
         configuration, and risk level.
         """
@@ -210,49 +235,3 @@ class AssetsModule(BaseModule):
 
         except Exception as e:
             return f"Error fetching details for asset {final_resource_id if 'final_resource_id' in locals() else 'Unknown'}: {str(e)}"
-
-    # def get_asset_details(
-    #     self, 
-    #     resource_id: str = Field(description="The exact 'resource_id' of the asset (e.g., '179-1').")
-    # ) -> str:
-    #     """
-    #     Retrieves the complete, unfiltered diagnostic profile of a single asset.
-    #     Use this when a deep-dive into a specific asset's full metadata is needed.
-    #     """
-    #     try:
-    #         data = self.client.request("GET", f"/ranger/assets/{resource_id}")
-    #         return json.dumps(data, indent=2)
-    #     except Exception as e:
-    #         return f"Error fetching details for asset {resource_id}: {str(e)}"
-
-    # def get_vulnerable_assets(
-    #     self,
-    #     cve_id: Optional[str] = Field(default=None, description="Filter by a specific CVE ID (e.g., 'CVE-2019-12260')."),
-    #     fields: Optional[str] = Field(
-    #         default="resource_id,;$name,;$ipv4,;$risk_level,;$total_cves_count,;$insights", 
-    #         description="Claroty formatted string of fields to return. Separator is ',;$'"
-    #     )
-    # ) -> str:
-    #     """
-    #     Retrieves a list of assets that have active Insights/Vulnerabilities.
-    #     This queries the /ranger/assets_with_insights endpoint.
-    #     """
-    #     try:
-    #         params = {
-    #             'per_page': 50,
-    #             'fields': fields
-    #         }
-            
-    #         if cve_id:
-    #             params['insight_cve_id__exact'] = cve_id
-
-    #         data = self.client.request("GET", "/ranger/assets_with_insights", params=params)
-    #         objects = data.get('objects', [])
-            
-    #         if not objects:
-    #             return "No highly vulnerable assets found matching criteria."
-
-    #         return json.dumps(objects, indent=2)
-            
-    #     except Exception as e:
-    #         return f"Error fetching vulnerable assets: {str(e)}"
