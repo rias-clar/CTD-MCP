@@ -50,10 +50,10 @@ For any filter marked with **Enums**, you may pass a single value or a JSON arra
 Only request the fields necessary to answer the user's prompt. Do not request fields that are not in this list. 
 **Note:** If you do not provide a `fields` list, the system will default to returning: `id`, `name`, `ipv4`, `ipv6`, `mac`, `vendor`, `model`, `firmware`, `asset_type`, and `risk_level`.
 
-* **Identity:** `id`, `name`, `display_name`, `hostname`, `mac`, `serial_number`
+* **Identity:** `id`, `name`, `display_name`, `hostname`, `mac`, `serial_number`, `edge_id`
 * **Network:** `ipv4`, `ipv6`, `vlan`, `gateway`, `default_gateway`, `network_id`, `subnet_id`, `protocol`
 * **Classification:** `vendor`, `model`, `firmware`, `asset_type`, `class_type`, `os`, `os_build`, `os_architecture`, `os_service_pack`
-* **Location/Topology:** `site_id`, `site_name`, `virtual_zone_id`, `virtual_zone_name`, `purdue_level`, `edge_id`
+* **Location/Topology:** `site_id`, `site_name`, `virtual_zone_id`, `virtual_zone_name`, `purdue_level`
 * **Risk & Posture:** `risk_level`, `risk_score`, `criticality`, `num_alerts`, `insight_names`
 * **Software/State:** `installed_antivirus`, `patch_count`, `installed_programs_count`, `plc_slots`, `state`, `domain_workgroup`
 * **Status:** `approved`, `valid`, `ghost`, `timestamp`, `first_seen`, `last_seen`
