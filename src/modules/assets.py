@@ -58,12 +58,12 @@ class AssetsModule(BaseModule):
         # self._add_tool(server, self.get_vulnerable_assets, "get_vulnerable_assets")
 
     def register_resources(self, server: FastMCP) -> None:
-        """Register the static schema resources with the MCP Server."""
+        """Register the Assets schema resources with the MCP Server."""
         
         resource = TextResource(
             uri=AnyUrl(ASSETS_SCHEMA_URI),
             name="ctd_assets_schema",
-            description="Contains the master guide, allowed filters, and enums for the `search_assets` and `search_assets_optim` tools.",
+            description="Contains the master guide, allowed filters, and enums for the `search_assets` and `get_assets_details` tools.",
             text=ASSETS_SCHEMA_DOCS, 
             mimeType="text/markdown"
         )
@@ -74,7 +74,7 @@ class AssetsModule(BaseModule):
     def get_assets_schema(self) -> str:
         """Retrieves the complete Claroty CTD Assets Search Schema, Filter Keys, and Guide.
         
-        Call this tool BEFORE executing search_assets if you need to look up 
+        Call this tool BEFORE executing search_assets to look up 
         allowed filter keys, required data types, integer enum mappings, or return fields.
         """
         return ASSETS_SCHEMA_DOCS
