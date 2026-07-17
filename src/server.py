@@ -3,6 +3,8 @@ from mcp.server.fastmcp import FastMCP
 from src.client import CTDClient
 from src.modules.assets import AssetsModule
 from src.modules.vulnerabilities import VulnerabilitiesModule
+from src.modules.insights import InsightsModule
+
 
 # Initialize the FastMCP Server
 # edit for when running local
@@ -18,6 +20,7 @@ def main():
         modules = [
             AssetsModule(client=client),
             #VulnerabilitiesModule(client=client), 
+            InsightsModule(client=client)
         ]
 
         # loop through all active modules and connect tools into FastMCP
