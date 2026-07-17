@@ -1,11 +1,13 @@
 import json
 from typing import Any, Optional
 from pydantic import Field, AnyUrl
-from src.modules.base import BaseModule
 
 from mcp.server.fastmcp import FastMCP
 from mcp.types import ToolAnnotations
 from mcp.server.fastmcp.resources import TextResource
+
+from src.modules.base import BaseModule
+from src.resources.assets import INSIGHTS_SCHEMA_URI, INSIGHTS_SCHEMA_DOCS
 
 
 class InsightsModule(BaseModule):
@@ -19,6 +21,19 @@ class InsightsModule(BaseModule):
 
     def register_tools(self, server: FastMCP) -> None:
         """Registers the Insights tools with the MCP Server."""
+        
+        self._add_tool(
+                server=server, 
+                method=self.get_insights_schema, 
+                name="get_insights_schema",
+                annotations=ToolAnnotations(
+                    readOnlyHint=True,
+                    destructiveHint=False,
+                    idempotentHint=True,
+                    openWorldHint=False,
+                )
+        )
+        
         self._add_tool(
             server=server,
             method=self.search_insights,
@@ -32,24 +47,48 @@ class InsightsModule(BaseModule):
         )
 
     #register resources
+    def register_resources(self, server: FastMCP) -> None:
+        """Register the static Insights schema resources with the MCP Server."""
+        
+        resource = TextResource(
+            uri=AnyUrl(INSIGHTS_SCHEMA_URI),
+            name="ctd_insights_schema",
+            description="Contains the master guide, allowed filters, and enums for the `search_insights` tools",
+            text=INSIGHTS_SCHEMA_DOCS, 
+            mimeType="text/markdown"
+        )
+        
+        self._add_resource(server, resource)
 
     #def for calling resource for insight schema
+    def get_insights_schema(self) -> str:
+        """Retrieves the complete Claroty CTD Insights Search Schema, Filter Keys, and Guide.
+        
+        Call this tool BEFORE executing search_insights if to look up 
+        allowed filter keys, insight names, required data types, or integer enum mappings.
+        """
+        return INSIGHTS_SCHEMA_DOCS
 
     def search_insights(
         self,
-        filters: dict[str, Any] | None = Field(
+        exact_insight: str | list[str] | None = Field(
             default=None,
-            description="Dictionary of search filters (e.g., insight_status__exact, insights_insight_name__exact). Enums can accept arrays of values for 'OR' searches. Consult the insights schema resource for allowed keys.",
+            description="Specific insight name(s) to filter by. Accepts a single string or an array of strings. Call `get_insights_schema` tool for allowed insight names. Defaults to all insights if omitted.",
+            examples=["Unsecured Protocols", ["Windows CVEs", "Open Ports"]]
+        ),
+        filters: dict[str, str | int | bool | list[str | int]] | None = Field(                
+            default=None,
+            description="Dictionary of additional search filters. Call `get_insights_schema` tool for allowed filter keys",
             examples=[{"insight_status__exact": 0, "criticality__exact": [1, 2]}]
         ),
         start_time: str | None = Field(
             default=None,
-            description="Optional start time for the search window (insight_timestamp__gte) formatted as a UTC ISO 8601 string.",
+            description="Optional start time for the search window, formatted as a UTC ISO 8601 string.",
             examples=["2026-07-09T00:00:00.000Z"]
         ),
         end_time: str | None = Field(
             default=None,
-            description="Optional end time for the search window (insight_timestamp__lte) formatted as a UTC ISO 8601 string.",
+            description="Optional end time for the search window, formatted as a UTC ISO 8601 string.",
             examples=["2026-07-16T23:59:59.000Z"]
         )
     ) -> str:
@@ -71,6 +110,12 @@ class InsightsModule(BaseModule):
                 'special_hint__exact': 0,
                 'insight_status__exact': 0,
             }
+
+            if exact_insight is not None:
+                if isinstance(exact_insight, list):
+                    params['insights_insight_name__exact'] = ",;$".join(str(v).strip() for v in exact_insight)
+                else:
+                    params['insights_insight_name__exact'] = exact_insight
 
             # 2. Apply Time Window
             if start_time:

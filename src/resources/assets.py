@@ -1,4 +1,3 @@
-
 #src/resources/assets.py
 
 ASSETS_SCHEMA_URI = "resource://ctd/assets-schema"
@@ -8,7 +7,7 @@ ASSETS_SCHEMA_DOCS = """# CTD Assets Search Schema and Guide
 This document provides the allowed fields, filters, and enums for the `search_assets` tool.
 
 ## 1. Default Parameters
-Unless otherwise specified by the user, the tool automatically applies these default search filters. You do not need to pass these unless you want to override the default behavior:
+Unless otherwise specified by the user, the tool automatically applies these default search filters. Do not pass these unless overriding default behavior:
 * `ghost__exact`: `false` (Excludes ghost/receive-only assets)
 * `valid__exact`: `true` (Only returns valid assets)
 * `approved__exact`: `true` (Only returns approved assets)
@@ -18,7 +17,7 @@ Unless otherwise specified by the user, the tool automatically applies these def
 
 ## 2. Allowed Search Filters
 Use these keys in the `filters` dictionary. Match the data types exactly.
-For any filter marked with **Enums**, you may pass a single value or a JSON array of multiple values to perform an "OR" search (e.g., `"purdue_level__exact": ["1", "1.5", "2"]`).
+For any filter marked with **Enums**, pass a single value or an array of multiple values to perform an "OR" search (e.g., `"purdue_level__exact": ["1", "1.5", "2"]`).
 
 | Filter Key | Type | Description | Example |
 | :--- | :--- | :--- | :--- |
@@ -48,7 +47,7 @@ For any filter marked with **Enums**, you may pass a single value or a JSON arra
 
 ## 3. Allowed Return Fields
 Only request the fields necessary to answer the user's prompt. Do not request fields that are not in this list. 
-**Note:** If you do not provide a `fields` list, the system will default to returning: `id`, `name`, `ipv4`, `ipv6`, `mac`, `vendor`, `model`, `firmware`, `asset_type`, and `risk_level`.
+**Note:** If a `fields` list is not provided, the system will default to returning: `id`, `name`, `ipv4`, `ipv6`, `mac`, `vendor`, `model`, `firmware`, `asset_type`, and `risk_level`.
 
 * **Identity:** `id`, `name`, `display_name`, `hostname`, `mac`, `serial_number`, `edge_id`
 * **Network:** `ipv4`, `ipv6`, `vlan`, `gateway`, `default_gateway`, `network_id`, `subnet_id`, `protocol`
