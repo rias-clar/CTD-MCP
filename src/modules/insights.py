@@ -7,7 +7,7 @@ from mcp.types import ToolAnnotations
 from mcp.server.fastmcp.resources import TextResource
 
 from src.modules.base import BaseModule
-from src.resources.assets import INSIGHTS_SCHEMA_URI, INSIGHTS_SCHEMA_DOCS
+from src.resources.insights import INSIGHTS_SCHEMA_URI, INSIGHTS_SCHEMA_DOCS
 
 
 class InsightsModule(BaseModule):
