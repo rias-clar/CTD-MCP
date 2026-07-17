@@ -173,7 +173,6 @@ class AssetsModule(BaseModule):
                     optimized_objects.append(cleaned_obj)
 
                 # Clean JSON serialization, remove all unnecessary spaces and newlines
-                # EDIT INTO MD
                 return json.dumps(optimized_objects, separators=(',', ':'))
 
             except Exception as e:
