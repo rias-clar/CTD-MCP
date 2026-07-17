@@ -73,8 +73,8 @@ class InsightsModule(BaseModule):
         self,
         exact_insight: str | list[str] | None = Field(
             default=None,
-            description="Specific insight name(s) to filter by. Accepts a single string or an array of strings. Call `get_insights_schema` tool for allowed insight names. Defaults to all insights if omitted.",
-            examples=["Unsecured Protocols", ["Windows CVEs", "Open Ports"]]
+            description="Specific insight name to filter by. Accepts a single string. Call `get_insights_schema` tool for allowed insight names. Defaults to all insights if omitted.",
+            examples=["Unsecured Protocols", "Windows CVEs"]
         ),
         filters: dict[str, str | int | bool | list[str | int]] | None = Field(                
             default=None,

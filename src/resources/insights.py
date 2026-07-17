@@ -26,7 +26,7 @@ For any filter marked with **Enums**, pass a single value or an array of multipl
 | `protocol__exact` | String | Exact network protocol match. | `"Modbus"` |
 | `criticality__exact` | Integer | Asset operational criticality. **Enums:** `0` (eLow), `1` (eMedium), `2` (eHigh). | `[1, 2]` |
 | `class_type__exact` | Integer | Asset class ID. **Enums:** `0` (OT), `1` (IT), `2` (IoT). | `0` |
-| `insight_excluded_types__in` | Integer | Exclude specific insight types by ID. *(See Insight Types below)* | `[1, 2]` |
+| `insight_excluded_types__in` | Integer | Exclude specific insight types by ID. Accepts multiple IDs. *(See Insight Types below)* | `[1, 2]` |
 
 ---
 
