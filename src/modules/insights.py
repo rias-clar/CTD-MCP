@@ -1,6 +1,7 @@
 import json
 from typing import Any, Optional
 from pydantic import Field, AnyUrl
+import urllib.parse
 
 from mcp.server.fastmcp import FastMCP
 from mcp.types import ToolAnnotations
@@ -164,7 +165,114 @@ class InsightsModule(BaseModule):
             return f"Error searching insights: {str(e)}"
     
     #add tools for specific insights
-    def get_insight_details():
+def get_insight_details(
+        self,
+        insight_name: str = Field(
+            description="Specific insight name to filter by. Accepts a single string. Call `get_insights_schema` tool for allowed insight names.",
+            examples=["Unsecured Protocols", "Windows CVEs"]
+        )
+    ) -> str:
+        """Retrieve all assets and details for a specific insight.
 
+        Returns a Markdown table of affected assets and insight context. Each row 
+        includes a `Filter Key` to be used with the `filter_assets_by_insight` 
+        tool for deeper investigation. Call `get_insights_schema` first for valid 
+        insight names.
+        """
+            
+        try:
+            insight_path = urllib.parse.quote(insight_name.strip())
+            
+            all_rows = []
+            current_page = 1
+            per_page = 50
+            
+            metadata = {"description": "", "total_records": 0}
+            valid_headers = []
+            valid_indices = []
 
-    def filter_assets_by_insight():
+            while True:
+                params = {
+                    'format': 'insight_page',
+                    'page': current_page,
+                    'per_page': per_page,
+                    'ghost__exact': False,
+                    'special_hint__exact': 0,
+                    'site_id__exact': 1,
+                    'insight_status__exact': 0,
+                }
+
+                response_data = self.client.request("GET", f"/ranger/insight_details/{insight_path}", params=params)
+
+                if not response_data or not isinstance(response_data, dict):
+                    break
+
+                page_rows = response_data.get("rows", [])
+                
+                # Extract headers and metadata on the first page
+                if current_page == 1:
+                    raw_desc = response_data.get("description", "")
+                    metadata["description"] = raw_desc.replace("<br>", " ").replace("<strong>", "").replace("</strong>", "")
+                    metadata["total_records"] = response_data.get("count_total", 0)
+                    
+                    for h in response_data.get("headers", []):
+                        # Drop the "Actions" column
+                        if h.get("type") != "bulk_actions" and h.get("name", "").lower() != "actions":
+                            valid_headers.append(h.get("name"))
+                            valid_indices.append(h.get("header_num"))
+
+                if not page_rows:
+                    break
+
+                all_rows.extend(page_rows)
+
+                # Stop Condition: Reached the end of available server data
+                if len(page_rows) < per_page:
+                    break
+                    
+                current_page += 1
+
+            if not all_rows:
+                return f"No detail records found for insight '{insight_name}'."
+
+            # Construct Markdown Output
+            md_lines = [
+                f"### Insight: {insight_name}",
+                f"**Description:** {metadata['description']}",
+                f"**Total Records:** {metadata['total_records']}",
+                ""
+            ]
+
+            # Append the Filter Key column for LLM context
+            table_headers = valid_headers + ["Filter Key"]
+            
+            # Build Table Header Row
+            md_lines.append("| " + " | ".join(table_headers) + " |")
+            md_lines.append("|" + "|".join(["---"] * len(table_headers)) + "|")
+
+            # Build Table Rows
+            for row in all_rows:
+                cells = row.get("cells", [])
+                row_data = []
+                
+                # Match cells to the valid indices
+                for idx in valid_indices:
+                    if idx < len(cells):
+                        # Clean cell text to prevent Markdown table breaks
+                        cell_text = str(cells[idx]).replace("|", "\\|").replace("\n", " ")
+                        row_data.append(cell_text)
+                    else:
+                        row_data.append("")
+                
+                # Extract and append the filter key
+                filter_key = row.get("row_filter", {}).get("filter_key", "")
+                row_data.append(str(filter_key).replace("|", "\\|"))
+                
+                md_lines.append("| " + " | ".join(row_data) + " |")
+
+            return "\n".join(md_lines)
+
+        except Exception as e:
+            return f"Error fetching details for insight '{insight_name}': {str(e)}"
+
+    #def filter_assets_by_insight():
