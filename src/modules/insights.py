@@ -59,6 +59,18 @@ class InsightsModule(BaseModule):
              )
         )
 
+        self._add_tool(
+            server=server,
+            method=self.filter_assets_by_insight,
+            name= "filter_assets_by_insight",
+            annotations=ToolAnnotations(
+                 readOnlyHint=True,
+                 destructiveHint=False,
+                 idempotentHint=True,
+                 openWorldHint=False,
+             )
+        )
+
     #register resources
     def register_resources(self, server: FastMCP) -> None:
         """Register the static Insights schema resources with the MCP Server."""
@@ -287,5 +299,94 @@ class InsightsModule(BaseModule):
             except Exception as e:
                 return f"Error fetching details for insight '{insight_name}': {str(e)}"
 
-    #def filter_assets_by_insight():
-    
+    def filter_assets_by_insight(
+        self,
+        filter_key: str | None = Field(
+            default=None,
+            description="The exact 'Filter Key' obtained from the `get_insight_details` tool for in-depth information about specific asset categories listed in insight details.",
+            examples=["Managed PLCs (by Rockwell users),;$1,;$236,;$ENG_AB%5CAdministrator,;$2026-05-18T18%3A55%3A47%2B00%3A00"]
+        ),
+        insight_name: str | None = Field(
+            default=None,
+            description="The exact insight name to get ALL assets associated with the insight. Call `get_insights_schema` for allowed names.",
+            examples=["Unsecured Protocols", "Windows CVEs"]
+        ),
+        limit: int = Field(
+            default=50,
+            ge=1,
+            le=500,
+            description="Maximum number of assets to return. Defaults to 50."
+        )
+    ) -> str:
+        """Retrieve detailed asset profiles associated with a specific insight.
+
+        Extracts foundational device information (IPs, MACs, OS, etc.) for affected assets. 
+        At least one parameter is strictly required: a `filter_key` (for precise matching 
+        using output from `get_insight_details`) or an `insight_name` (to retrieve 
+        all assets tied to the insight).
+        """
+
+        if not filter_key and not insight_name:
+            return "Error: You must provide at least one parameter (either 'filter_key' or 'insight_name')."
+
+        try:
+            # Base default parameters for the assets endpoint
+            params: dict[str, Any] = {
+                'special_hint__exact': 0,  
+                'valid__exact': True,      
+                'ghost__exact': False,     
+                'approved__exact': True,
+                # Request a condensed set of highly relevant fields to save tokens
+                'fields': "id,;$name,;$ipv4,;$mac,;$vendor,;$model,;$asset_type,;$risk_level,;$criticality,;$os"
+            }
+
+            # Apply the appropriate filter
+            if filter_key:
+                params['insight_row_key__exact'] = filter_key.strip()
+            elif insight_name:
+                params['insights_insight_name__exact'] = insight_name.strip()
+
+            all_objects = []
+            current_page = 1
+            per_page = min(limit, 100)
+
+            while True:
+                params['page'] = current_page
+                params['per_page'] = per_page
+
+                # Fetch from V1 Assets endpoint
+                response_data = self.client.request("GET", "/ranger/assets", params=params)
+                
+                if not isinstance(response_data, dict):
+                    break
+
+                objects = response_data.get('objects', [])
+                if not objects:
+                    break
+
+                all_objects.extend(objects)
+
+                # Stop Conditions
+                if len(all_objects) >= limit:
+                    all_objects = all_objects[:limit]
+                    break
+                if len(objects) < per_page:
+                    break
+                    
+                current_page += 1
+
+            if not all_objects:
+                identifier = filter_key if filter_key else insight_name
+                return f"No assets found matching the insight criteria for: '{identifier}'."
+
+            # Output Token Optimization
+            optimized_objects = []
+            for obj in all_objects:
+                # Strip out null, empty string, or empty list values
+                cleaned_obj = {k: v for k, v in obj.items() if v not in (None, "", [], {})}
+                optimized_objects.append(cleaned_obj)
+
+            return json.dumps(optimized_objects, separators=(',', ':'))
+
+        except Exception as e:
+            return f"Error filtering assets by insight: {str(e)}"
