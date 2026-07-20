@@ -163,3 +163,8 @@ class InsightsModule(BaseModule):
         except Exception as e:
             return f"Error searching insights: {str(e)}"
     
+    #add tools for specific insights
+    def get_insight_details():
+
+
+    def filter_assets_by_insight():
