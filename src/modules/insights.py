@@ -303,7 +303,7 @@ class InsightsModule(BaseModule):
         self,
         filter_key: str | None = Field(
             default=None,
-            description="The exact string from the 'filter_key (Asset Lookup)' column of the `get_insight_details` table. Use this to drill down into a specific sub-category of an insight. Only query ONE filter_key per message. Do not make parallel tool calls.",
+            description="The EXACT string from the 'filter_key (Asset Lookup)' column of the `get_insight_details` table. This string MUST be passed VERBATIM, including all commas, dollar signs, and semicolons (e.g., `,;$`). Do not alter, parse, or clean this string; it is a proprietary system token used to drill down into a specific sub-category. IMPORTANT: Only query ONE filter_key per message. Do not make parallel tool calls.",
             examples=["Unsecured Protocols,;$1,;$,;$SMB,;$SMB+version+1..."]
         ),
         insight_name: str | None = Field(
