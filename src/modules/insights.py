@@ -337,14 +337,14 @@ class InsightsModule(BaseModule):
                 'ghost__exact': False,     
                 'approved__exact': True,
                 # Request a condensed set of highly relevant fields to save tokens
-                'fields': "id,;$name,;$ipv4,;$mac,;$vendor,;$model,;$asset_type,;$risk_level,;$criticality,;$os"
+                'fields': "id,;$name,;$ipv4,;$vendor,;$model,;$asset_type,;$risk_level"
             }
 
             # Apply the appropriate filter
             if filter_key:
                 params['insight_row_key__exact'] = filter_key.strip()
             elif insight_name:
-                params['insights_insight_name__exact'] = insight_name.strip()
+                params['insight_name__exact'] = insight_name.strip()
 
             all_objects = []
             current_page = 1
