@@ -288,9 +288,15 @@ class InsightsModule(BaseModule):
                         else:
                             row_data.append("")
                     
-                    # Extract and append the filter key
                     filter_key = row.get("row_filter", {}).get("filter_key", "")
-                    row_data.append(str(filter_key).replace("|", "\\|"))
+                    
+                    if filter_key:
+                        # The backticks force the LLM to treat it as a literal string
+                        formatted_key = f"`{filter_key}`"
+                    else:
+                        formatted_key = ""
+                        
+                    row_data.append(formatted_key.replace("|", "\\|"))
                     
                     md_lines.append("| " + " | ".join(row_data) + " |")
 
@@ -303,8 +309,8 @@ class InsightsModule(BaseModule):
         self,
         filter_key: str | None = Field(
             default=None,
-            description="The EXACT string from the 'filter_key (Asset Lookup)' column of the `get_insight_details` table. This string MUST be passed VERBATIM, including all commas, dollar signs, and semicolons (e.g., `,;$`). Do not alter, parse, or clean this string; it is a proprietary system token used to drill down into a specific sub-category. IMPORTANT: Only query ONE filter_key per message. Do not make parallel tool calls.",
-            examples=["Unsecured Protocols,;$1,;$,;$SMB,;$SMB+version+1..."]
+            description="Use the exact string inside the backticks from `get_insight_details` to drill down into assets for a specific insight sub-category. Copy verbatim—do not alter, decode, or add spaces. Query strictly one key per message.",
+            examples=["Unsecured Protocols,;$1,;$,;$SMB,;$SMB+version+1+is..."]
         ),
         insight_name: str | None = Field(
             default=None,
