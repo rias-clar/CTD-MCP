@@ -268,7 +268,7 @@ class InsightsModule(BaseModule):
                 ]
 
                 # Append the Filter Key column for LLM context
-                table_headers = valid_headers + ["Filter Key"]
+                table_headers = valid_headers + ["filter_key (Asset Lookup)"]
                 
                 # Build Table Header Row
                 md_lines.append("| " + " | ".join(table_headers) + " |")
@@ -303,8 +303,8 @@ class InsightsModule(BaseModule):
         self,
         filter_key: str | None = Field(
             default=None,
-            description="The exact 'Filter Key' obtained from the `get_insight_details` tool for in-depth information about specific asset categories listed in insight details.",
-            examples=["Managed PLCs (by Rockwell users),;$1,;$236,;$ENG_AB%5CAdministrator,;$2026-05-18T18%3A55%3A47%2B00%3A00"]
+            description="The exact string from the 'filter_key (Asset Lookup)' column of the `get_insight_details` table. Use this to drill down into a specific sub-category of an insight. Only query ONE filter_key per message. Do not make parallel tool calls.",
+            examples=["Unsecured Protocols,;$1,;$,;$SMB,;$SMB+version+1..."]
         ),
         insight_name: str | None = Field(
             default=None,
@@ -318,12 +318,14 @@ class InsightsModule(BaseModule):
             description="Maximum number of assets to return. Defaults to 50."
         )
     ) -> str:
-        """Retrieve detailed asset profiles associated with a specific insight.
+        """Retrieve assets information associated with a specific insight or insight sub-category.
 
         Extracts foundational device information (IPs, MACs, OS, etc.) for affected assets. 
-        At least one parameter is strictly required: a `filter_key` (for precise matching 
-        using output from `get_insight_details`) or an `insight_name` (to retrieve 
-        all assets tied to the insight).
+        At least one parameter is strictly required: a `filter_key` (to drill down into a 
+        specific sub-category or single row returned by `get_insight_details`) or an 
+        `insight_name` (to broadly retrieve all assets tied to the entire insight category). 
+        Do not attempt to query multiple filter_keys at once; process them sequentially 
+        or request user preference.
         """
 
         if not filter_key and not insight_name:
